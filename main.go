@@ -17,7 +17,8 @@ import (
     "github.com/JohannesKaufmann/html-to-markdown"
 )
 
-var downloadFiles  = false
+// DEBUG
+var downloadFiles  = true
 var createMetadata = true
 
 func main() {
@@ -63,8 +64,9 @@ func main() {
     os.MkdirAll(podcastDir, os.ModePerm)
 
     for _, item := range feed.Items {
-        // Process only season 4 episodes
-        if item.ITunesExt.Season == "4" {
+        // DEBUG Process only season 4 episodes
+        // if item.ITunesExt.Season == "4" {
+        if true {
             // Format season and episode with leading zeros
             epType := item.ITunesExt.EpisodeType
             seasonNumber := fmt.Sprintf("%02d", parseSeasonNumber(item.ITunesExt.Season))
