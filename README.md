@@ -27,7 +27,8 @@ To build the tool:
 ```bash
 git clone https://github.com/ruvido/mitril.git
 cd mitril
-go build -o mitril
+go mod tidy
+go build
 ```
 
 ## Usage
