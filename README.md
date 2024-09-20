@@ -28,32 +28,33 @@ go build -o mitril
 
 ## Usage
 
-Run the tool by providing an RSS feed file or URL:
-
-    ./mitril feed.rss
-
-Alternatively, specify the RSS feed URL directly:
+Run the tool by providing an RSS feed URL:
 
     ./mitril https://podcast.example.com/feed.rss
+
+Alternatively, specify a RSS feed file:
+
+    ./mitril feed.rss
 
 ## Folder Structure
 
 Once the episodes are downloaded, the folder structure will look like this:
 
-```
+```plaintext
 download/
 ├── audio/
 │   ├── season-01/
-│   │   ├── s01e01-episode-title.mp3
-│   │   ├── s01e02-episode-title.mp3
+│   │   ├── s01-e01-episode-title.mp3
+│   │   ├── s01-e02-episode-title.mp3
 │   └── season-02/
-│       └── s02e01-episode-title.mp3
+│       └── s02-e01-episode-title.mp3
 └── content/
-    ├── season-01/
-    │   ├── s01e01-episode-title.md
-    │   ├── s01e02-episode-title.md
-    └── season-02/
-        └── s02e01-episode-title.md
+    └── podcast/
+        ├── season-01/
+        │   ├── s01-e01-episode-title.md
+        │   ├── s01-e02-episode-title.md
+        └── season-02/
+            └── s02-e01-episode-title.md
 ```
 
 Each episode will have a corresponding .md metadata file in the content/ folder, ready for use in Hugo or another static site generator.
@@ -64,11 +65,11 @@ Each episode will have a corresponding .md metadata file in the content/ folder,
 ---
 title:    "Episode Title"
 season:   "01"
-number:   "e01"
+number:   "01"
 date:     "2024-09-20"
-file:     "episodes/season-01/s01e01-episode-title.mp3"
+file:     "/audio/season-01/s01-e01-episode-title.mp3"
 length:   "12345678"
-duration: "35:12"
+duration: "3512"
 guid:     "abc123"
 aliases:  ["/s01e01"]
 slug:     "episode-title"
