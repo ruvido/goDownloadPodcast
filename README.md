@@ -18,18 +18,14 @@ These Markdown files are designed for integration with static site generators, s
 
 ## Installation
 
-Required tools (example for Debian 12)
-
-    apt update && apt install git golang
-
 To build the tool:
 
 ```bash
 git clone https://github.com/ruvido/mitril.git
 cd mitril
-go mod tidy
 go build
 ```
+in case of errors, check your go version (or remove the go version tag from the go.mod file)
 
 ## Usage
 
