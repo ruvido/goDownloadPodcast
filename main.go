@@ -18,8 +18,14 @@ import (
 )
 
 // DEBUG
-var downloadFiles  = true
-var createMetadata = true
+var debug           = true
+var downloadFiles   = true
+var createMetadata  = true
+var podcastDir      = "download"
+var contentLoc      = "content/podcast" // hugo folder tree
+var mediaLoc        = "audio"           // audio files
+var serverURL       = "/"               // absolute location for audio
+var audioEXT        = "mp3"
 
 func main() {
     if len(os.Args) < 2 {
@@ -60,7 +66,6 @@ func main() {
     // }
 
     // Directory setup
-    podcastDir := "podcast"
     os.MkdirAll(podcastDir, os.ModePerm)
 
     for _, item := range feed.Items {
@@ -71,32 +76,38 @@ func main() {
             epType := item.ITunesExt.EpisodeType
             seasonNumber := fmt.Sprintf("%02d", parseSeasonNumber(item.ITunesExt.Season))
             episodeNumber := fmt.Sprintf("%02d", parseEpisodeNumber(item.ITunesExt.Episode))
-            if epType == "bonus" {
-                episodeNumber = epType
-            }
-
-            season := fmt.Sprintf("s%s", seasonNumber)
+            season := fmt.Sprintf ("s%s", seasonNumber)
             episode := fmt.Sprintf("e%s", episodeNumber)
             title := item.Title
             slug := slugify(title)
             epDate := item.PublishedParsed.Format("2006-01-02")
-            alias := fmt.Sprintf("/%s-%s", season, episode)
+            alias := fmt.Sprintf("/%s%s", seasonNumber, episodeNumber)
             if epType == "bonus" {
                 alias = ""
+                episode = ""
+                episodeNumber = ""
             }
-            filename := fmt.Sprintf("%s-%s-%s.mp3", season, episode, slug)
+
+            // Folder tree
+            filename    := fmt.Sprintf("%s-%s-%s", season, episode, slug)
+            contentDir  := filepath.Join(podcastDir, contentLoc, fmt.Sprintf("season-%s", season))
+            mediaDir    := filepath.Join(podcastDir, mediaLoc,   fmt.Sprintf("season-%s", season))
+            filepathMd  := filepath.Join(contentDir, filename+".md")
+            audioName   := filename+"."+audioEXT
+            audioURL    := filepath.Join(serverURL, mediaLoc, fmt.Sprintf("season-%s", season), audioName)
+            audioPath   := filepath.Join(mediaDir, audioName)
+            
+
             // Debug print
-            log.Printf("Season: %s, Episode: %s| %s %s | %s\n", seasonNumber, episodeNumber, epDate, epType, title)
-
-            episodesDir := filepath.Join(podcastDir, "episodes", fmt.Sprintf("season-%s", season))
-            contentDir := filepath.Join(podcastDir, "content", fmt.Sprintf("season-%s", season))
-
-            filepathMp3 := filepath.Join(episodesDir, filename)
+            if debug {
+                log.Println(filename)
+                log.Printf("Season: %s, Episode: %s| %s %s | %s\n", seasonNumber, episodeNumber, epDate, epType, title)
+            }
 
             if downloadFiles {
-                os.MkdirAll(episodesDir, os.ModePerm)
+                os.MkdirAll(mediaDir, os.ModePerm)
                 fmt.Printf("Downloading %s...\n", filename)
-                if err := downloadFile(item.Enclosures[0].URL, filepathMp3); err != nil {
+                if err := downloadFile(item.Enclosures[0].URL, audioPath); err != nil {
                     fmt.Printf("Error downloading %s: %v\n", filename, err)
                     continue
                 }
@@ -115,7 +126,7 @@ title:    "%s"
 season:   "%s"
 number:   "%s"
 date:     "%s"
-file:     "episodes/%s/%s"
+file:     "%s"
 length:   "%s"
 duration: "%s"
 guid:     "%s"
@@ -123,9 +134,8 @@ aliases:  ["%s"]
 slug:     "%s"
 ---
 %s
-                `, title, seasonNumber, episodeNumber, item.PublishedParsed.Format("2006-01-02"), season, filename, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
+                `, title, seasonNumber, episodeNumber, item.PublishedParsed.Format("2006-01-02"), audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
 
-                filepathMd := filepath.Join(contentDir, fmt.Sprintf("%s-%s.md", alias, slug))
                 fmt.Printf("Writing metadata to %s\n", filepathMd)
                 if err := os.WriteFile(filepathMd, []byte(metadata), 0644); err != nil {
                     fmt.Printf("Error writing metadata for %s: %v\n", filename, err)
