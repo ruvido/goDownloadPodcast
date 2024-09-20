@@ -18,6 +18,10 @@ These Markdown files are designed for integration with static site generators, s
 
 ## Installation
 
+Required tools (example for Debian 12)
+
+    apt update && apt install git golang
+
 To build the tool:
 
 ```bash
