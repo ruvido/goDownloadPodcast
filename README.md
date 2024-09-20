@@ -25,7 +25,7 @@ Required tools (example for Debian 12)
 To build the tool:
 
 ```bash
-git clone git@github.com:ruvido/mitril.git 
+git clone https://github.com/ruvido/mitril.git
 cd mitril
 go build -o mitril
 ```
