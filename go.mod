@@ -1,4 +1,4 @@
-module github.com/ruvido/goDownloadPodcast
+module github.com/ruvido/mitril
 
 go 1.22.6
 
