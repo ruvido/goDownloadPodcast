@@ -29,6 +29,14 @@ in case of errors, check your go version (or remove the go version tag from the 
 
 ## Usage
 
+Get the help by running ``./mitril`` with no flags
+
+```
+Usage: mitril [options] <RSS_FILE_OR_URL>
+Options:
+  -d    Download audio files
+  -m    Create metadata files
+```
 Run the tool by providing an RSS feed URL:
 
     ./mitril https://podcast.example.com/feed.rss
@@ -36,6 +44,11 @@ Run the tool by providing an RSS feed URL:
 Alternatively, specify a RSS feed file:
 
     ./mitril feed.rss
+
+without ``-d`` or ``-m`` a dry run will be executed. 
+For a complete download, run:
+
+    ./mitril -d -m https://podcast.example.com/feed.rss
 
 ## Folder Structure
 

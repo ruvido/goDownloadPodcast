@@ -1,6 +1,7 @@
 package main
 
 import (
+    "time"
     "flag"
     "log"
     "fmt"
@@ -32,14 +33,14 @@ func main() {
     var createMetadata bool
 
     flag.BoolVar(&downloadFiles, "d", false, "Download audio files")
-    flag.BoolVar(&createMetadata, "f", false, "Create metadata files")
+    flag.BoolVar(&createMetadata, "m", false, "Create metadata files")
     flag.Parse()
 
     if flag.NArg() < 1 {
-        fmt.Println("Usage: your_program [options] <RSS_FILE_OR_URL>")
+        fmt.Println("Usage: mitril [options] <RSS_FILE_OR_URL>")
         fmt.Println("Options:")
         fmt.Println("  -d    Download audio files")
-        fmt.Println("  -f    Create metadata files")
+        fmt.Println("  -m    Create metadata files")
         return
     }
 
@@ -92,6 +93,7 @@ func main() {
             // fmt.Println(item.PublishedParsed.Format("2006-01-02"))
         if true {
             // Format season and episode with leading zeros
+            parsedTime, _:= time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.Published)
             epType := item.ITunesExt.EpisodeType
             seasonNumber := fmt.Sprintf("%02d", parseSeasonNumber(item.ITunesExt.Season))
             episodeNumber := fmt.Sprintf("%02d", parseEpisodeNumber(item.ITunesExt.Episode))
@@ -100,7 +102,7 @@ func main() {
             title := item.Title
             slug := slugify(title)
             // epDate := item.PublishedParsed.Format("2006-01-02")
-            epDate := item.Published
+            epDate := parsedTime.Format("2006-01-02")
             alias := fmt.Sprintf("/%s%s", seasonNumber, episodeNumber)
             if epType == "bonus" {
                 alias = ""
