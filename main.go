@@ -1,6 +1,7 @@
 package main
 
 import (
+    "flag"
     "log"
     "fmt"
     "io"
@@ -19,21 +20,35 @@ import (
 
 // DEBUG
 var debug           = true
-var downloadFiles   = true
-var createMetadata  = true
 var podcastDir      = "download"
 var contentLoc      = "content/podcast" // hugo folder tree
 var mediaLoc        = "audio"           // audio files
 var serverURL       = "/"               // absolute location for audio
 var audioEXT        = "mp3"
 
+
 func main() {
-    if len(os.Args) < 2 {
-        fmt.Println("Please provide the RSS file path OR a valid RSS url")
+    var downloadFiles bool
+    var createMetadata bool
+
+    flag.BoolVar(&downloadFiles, "d", false, "Download audio files")
+    flag.BoolVar(&createMetadata, "f", false, "Create metadata files")
+    flag.Parse()
+
+    if flag.NArg() < 1 {
+        fmt.Println("Usage: your_program [options] <RSS_FILE_OR_URL>")
+        fmt.Println("Options:")
+        fmt.Println("  -d    Download audio files")
+        fmt.Println("  -f    Create metadata files")
         return
     }
 
-    input := os.Args[1]
+    input := flag.Arg(0)
+
+    // Alert the user for a dry run
+    if !downloadFiles && !createMetadata {
+        fmt.Println("No download or metadata creation flags provided. This will be a dry run.")
+    }
 
     // Parse the RSS feed from URL or file
     var feed *gofeed.Feed
@@ -70,7 +85,11 @@ func main() {
 
     for _, item := range feed.Items {
         // DEBUG Process only season 4 episodes
-        // if item.ITunesExt.Season == "4" {
+        // if item.ITunesExt.Season == "4" &&  item.ITunesExt.EpisodeType == "bonus" {
+            // fmt.Println(item.GUID)
+            // fmt.Println(item.Published)
+            // fmt.Println(item.PublishedParsed)
+            // fmt.Println(item.PublishedParsed.Format("2006-01-02"))
         if true {
             // Format season and episode with leading zeros
             epType := item.ITunesExt.EpisodeType
@@ -80,7 +99,8 @@ func main() {
             episode := fmt.Sprintf("e%s", episodeNumber)
             title := item.Title
             slug := slugify(title)
-            epDate := item.PublishedParsed.Format("2006-01-02")
+            // epDate := item.PublishedParsed.Format("2006-01-02")
+            epDate := item.Published
             alias := fmt.Sprintf("/%s%s", seasonNumber, episodeNumber)
             if epType == "bonus" {
                 alias = ""
@@ -100,7 +120,7 @@ func main() {
 
             // Debug print
             if debug {
-                log.Println(filename)
+                // log.Println(filename)
                 log.Printf("Season: %s, Episode: %s| %s %s | %s\n", seasonNumber, episodeNumber, epDate, epType, title)
             }
 
@@ -134,7 +154,7 @@ aliases:  ["%s"]
 slug:     "%s"
 ---
 %s
-                `, title, seasonNumber, episodeNumber, item.PublishedParsed.Format("2006-01-02"), audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
+                `, title, seasonNumber, episodeNumber, epDate, audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
 
                 fmt.Printf("Writing metadata to %s\n", filepathMd)
                 if err := os.WriteFile(filepathMd, []byte(metadata), 0644); err != nil {
