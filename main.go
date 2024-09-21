@@ -24,16 +24,18 @@ var debug           = true
 var podcastDir      = "download"
 var contentLoc      = "content/podcast" // hugo folder tree
 var mediaLoc        = "audio"           // audio files
-var serverURL       = "/"               // absolute location for audio
+// var serverURL       = "/"               // absolute location for audio
 var audioEXT        = "mp3"
 
 
 func main() {
-    var downloadFiles bool
-    var createMetadata bool
+    var downloadFiles   bool
+    var createMetadata  bool
+    var webPrefix       string
 
-    flag.BoolVar(&downloadFiles, "d", false, "Download audio files")
-    flag.BoolVar(&createMetadata, "m", false, "Create metadata files")
+    flag.BoolVar(&downloadFiles,    "d", false, "Download audio files")
+    flag.BoolVar(&createMetadata,   "m", false, "Create metadata files")
+    flag.StringVar(&webPrefix,        "p", "",    "Prefix for web audio files")
     flag.Parse()
 
     if flag.NArg() < 1 {
@@ -41,6 +43,7 @@ func main() {
         fmt.Println("Options:")
         fmt.Println("  -d    Download audio files")
         fmt.Println("  -m    Create metadata files")
+        fmt.Println("  -p    Prefix for web audio files")
         return
     }
 
@@ -112,12 +115,13 @@ func main() {
 
             // Folder tree
             filename    := fmt.Sprintf("%s-%s-%s", season, episode, slug)
-            contentDir  := filepath.Join(podcastDir, contentLoc, fmt.Sprintf("season-%s", season))
-            mediaDir    := filepath.Join(podcastDir, mediaLoc,   fmt.Sprintf("season-%s", season))
+            contentDir  := filepath.Join(podcastDir, contentLoc, fmt.Sprintf("season-%s", seasonNumber))
+            audioDir    := filepath.Join(podcastDir, mediaLoc,   fmt.Sprintf("season-%s", seasonNumber))
             filepathMd  := filepath.Join(contentDir, filename+".md")
             audioName   := filename+"."+audioEXT
-            audioURL    := filepath.Join(serverURL, mediaLoc, fmt.Sprintf("season-%s", season), audioName)
-            audioPath   := filepath.Join(mediaDir, audioName)
+            // audioURL    := filepath.Join(serverURL, mediaLoc, fmt.Sprintf("season-%s", season), audioName)
+            audioURL    := filepath.Join(fmt.Sprintf("season-%s", seasonNumber), audioName)
+            audioPath   := filepath.Join(audioDir, audioName)
             
 
             // Debug print
@@ -127,7 +131,7 @@ func main() {
             }
 
             if downloadFiles {
-                os.MkdirAll(mediaDir, os.ModePerm)
+                os.MkdirAll(audioDir, os.ModePerm)
                 fmt.Printf("Downloading %s...\n", filename)
                 if err := downloadFile(item.Enclosures[0].URL, audioPath); err != nil {
                     fmt.Printf("Error downloading %s: %v\n", filename, err)
@@ -156,7 +160,7 @@ aliases:  ["%s"]
 slug:     "%s"
 ---
 %s
-                `, title, seasonNumber, episodeNumber, epDate, audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
+                `, title, seasonNumber, episodeNumber, epDate, webPrefix+"/"+audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
 
                 fmt.Printf("Writing metadata to %s\n", filepathMd)
                 if err := os.WriteFile(filepathMd, []byte(metadata), 0644); err != nil {

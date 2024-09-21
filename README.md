@@ -37,6 +37,7 @@ Usage: mitril [options] <RSS_FILE_OR_URL>
 Options:
   -d    Download audio files
   -m    Create metadata files
+  -p    Prefix for web audio files
 ```
 Run the tool by providing an RSS feed URL:
 
@@ -82,7 +83,7 @@ title:    "Episode Title"
 season:   "01"
 number:   "01"
 date:     "2024-09-20"
-audio:    "/audio/season-01/s01-e01-episode-title.mp3"
+audio:    "/season-01/s01-e01-episode-title.mp3"
 length:   "12345678"
 duration: "3512"
 guid:     "abc123"
@@ -91,6 +92,18 @@ slug:     "episode-title"
 ---
 This is a brief description of the episode.
 ```
+
+## Prefix for web audio files
+
+Using ``-p`` adds a prefix to the filepath in the audio tag of the markdown files, e.g.
+
+    ./mitril -d -m -p "https://storage.ex.com" https://podcast.example.com/feed.rss
+
+modifies the yaml tag to:
+
+    audio:    "https://storage.ex.com/season-01/s01-e01-episode-title.mp3"
+
+this is useful when serving podcast pages and audio files from different servers.
 
 ## Contribution & Support
 
