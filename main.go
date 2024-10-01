@@ -3,7 +3,7 @@ package main
 import (
     "time"
     "flag"
-    "log"
+    // "log"
     "fmt"
     "io"
     "net/http"
@@ -20,7 +20,7 @@ import (
 )
 
 // DEBUG
-var debug           = true
+var debug           = false
 var podcastDir      = "download"
 var contentLoc      = "content/podcast" // hugo folder tree
 var mediaLoc        = "audio"           // audio files
@@ -104,10 +104,13 @@ func main() {
             episode := fmt.Sprintf("e%s", episodeNumber)
             title := item.Title
             slug := slugify(title)
+            slugMD := season+"-"+episode+"-"+slug
             // epDate := item.PublishedParsed.Format("2006-01-02")
             epDate := parsedTime.Format("2006-01-02")
             alias := fmt.Sprintf("/%s%s", seasonNumber, episodeNumber)
             if epType == "bonus" {
+                // slugMD = season+"-bonus-"+slug
+                slugMD = season+"-"+slug
                 alias = ""
                 episode = ""
                 episodeNumber = ""
@@ -124,11 +127,9 @@ func main() {
             audioPath   := filepath.Join(audioDir, audioName)
             
 
-            // Debug print
-            if debug {
-                // log.Println(filename)
-                log.Printf("Season: %s, Episode: %s| %s %s | %s\n", seasonNumber, episodeNumber, epDate, epType, title)
-            }
+            // LOG print
+            // fmt.Printf("Season: %s, Episode: %s| %s %s | %s\n", seasonNumber, episodeNumber, epDate, epType, title)
+            fmt.Printf("Season: %s, Episode: %s| %s | %s\n", seasonNumber, episodeNumber, epDate, title)
 
             if downloadFiles {
                 os.MkdirAll(audioDir, os.ModePerm)
@@ -160,9 +161,11 @@ aliases:  ["%s"]
 slug:     "%s"
 ---
 %s
-                `, title, seasonNumber, episodeNumber, epDate, webPrefix+"/"+audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slug, description)
+                `, title, seasonNumber, episodeNumber, epDate, webPrefix+"/"+audioURL, item.Enclosures[0].Length, item.ITunesExt.Duration, item.GUID, alias, slugMD, description)
 
-                fmt.Printf("Writing metadata to %s\n", filepathMd)
+                if debug {
+                    fmt.Printf("Writing metadata to %s\n", filepathMd)
+                }
                 if err := os.WriteFile(filepathMd, []byte(metadata), 0644); err != nil {
                     fmt.Printf("Error writing metadata for %s: %v\n", filename, err)
                 }

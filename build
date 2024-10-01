@@ -1,0 +1,2 @@
+go build -o mitril
+mv mitril ~/bin
